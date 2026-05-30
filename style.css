@@ -1,0 +1,410 @@
+/* Global Styles - Clean Professional Minimalist */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Playfair+Display:wght@700&display=swap');
+
+:root {
+    /* Color Palette */
+    --bg-color: #ffffff;
+    --text-primary: #222222;
+    --text-secondary: #666666;
+    --accent-color: #000000; 
+    --link-color: #0056b3;
+    --section-bg: #f9f9f9;
+    --border-color: #e0e0e0;
+    
+    /* Layout Variables */
+    --nav-height: 70px;
+    --max-width: 1100px;
+}
+
+* {
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-primary);
+    background-color: var(--bg-color);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Sticky Footer trick from class */
+}
+
+/* Typography Styles */
+h1, h2, h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--text-primary);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+}
+
+h1 {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 2.2rem;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+h2::after {
+    /* Removed underline */
+    content: none;
+}
+
+p {
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #003d82;
+}
+
+/* Navigation */
+nav {
+    height: var(--nav-height);
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centered nav */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+nav a {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+nav a:hover, nav a.active {
+    color: var(--text-secondary); /* Subtle hover */
+}
+
+/* Header / Hero */
+header {
+    text-align: center;
+    padding: 4rem 1rem;
+    max-width: var(--max-width);
+    margin: 0 auto;
+}
+
+header p.subtitle {
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+    max-width: 600px;
+    margin-left: auto; /* Center subtitle if header is centered */
+    margin-right: auto;
+}
+
+/* Main Layout */
+main {
+    flex: 1;
+    width: 100%;
+}
+
+.container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Sections */
+section {
+    padding: 4rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+/* Grid Layouts */
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px; /* Slight rounding */
+    display: block;
+}
+
+/* Uniform feature images on homepage (excluding profile image) */
+.grid-2 img:not(.profile-img) {
+    width: 100%;
+    height: 400px; /* Fixed height for consistency */
+    object-fit: cover; /* Ensures image covers the area without distortion */
+}
+
+.profile-img {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    background-color: var(--text-primary);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn:hover {
+    background-color: #444;
+    color: #fff;
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--text-primary);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    background-color: var(--text-primary);
+    color: #fff;
+}
+
+/* Cards (Services, Portfolio) */
+.card {
+    background: #fff;
+    padding: 2rem;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+    height: 100%; /* Make cards equal height in grid */
+    display: flex;
+    flex-direction: column;
+}
+
+.card a {
+    margin-top: auto; /* Push link to bottom */
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-color: var(--text-primary);
+}
+
+.card h3 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    background-color: var(--text-primary);
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    align-self: flex-start; /* Aligns badge to start of flex container (card) */
+}
+
+/* Forms */
+form {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input[type="text"],
+input[type="email"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--text-primary);
+}
+
+input[type="submit"] {
+    background-color: var(--text-primary);
+    color: #fff;
+    border: none;
+    padding: 14px 30px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: background 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #444;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+th {
+    font-weight: 600;
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--text-primary);
+}
+
+/* 
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+} 
+*/
+
+/* Lists */
+ul.clean-list {
+    list-style: none;
+}
+
+ul.clean-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+}
+
+ul.clean-list li:last-child {
+    border-bottom: none;
+}
+
+/* Bullet Lists (for descriptive content) */
+ul.bullet-list {
+    text-align: left;
+    display: inline-block;
+    max-width: 100%;
+    margin-top: 15px;
+    margin-bottom: 20px;
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+    padding-left: 20px;
+}
+
+ul.bullet-list li {
+    margin-bottom: 10px;
+}
+
+/* Footer */
+footer {
+    padding: 3rem 1rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+footer a {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    h1 { font-size: 2.5rem; }
+    
+    .grid-2 {
+        grid-template-columns: 1fr;
+    }
+    
+    header {
+        text-align: center;
+        padding: 4rem 1rem;
+    }
+
+    h2::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    nav ul {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .grid-2 img {
+        height: auto; /* Allow auto height on mobile */
+        max-height: 400px;
+    }
+}
+
+/* New Styles for Forms */
+/* Forgot to add these earlier */
+input[type="submit"] {
+    cursor: pointer; /* hand icon */
+}
