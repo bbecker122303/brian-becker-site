@@ -1,28 +1,101 @@
 (function () {
     const SESSION_KEY = 'siteAdminSession';
-    const TOKEN_KEY = 'siteAdminGithubToken';
+    const UNLOCK_KEY = 'siteAdminUnlock';
     const FILE_SHA_KEY = 'siteContentSha';
     const CONFIG_SHA_KEY = 'siteConfigSha';
     const CONFIG_PATH = 'admin/config.js';
 
     let siteData = null;
     let activeTab = 'home';
-    let pendingConfigSave = false;
+    let sessionPassword = null;
+    let sessionToken = null;
 
-    function getStoredToken() {
-        return localStorage.getItem(TOKEN_KEY) || '';
+    function getActiveToken() {
+        return sessionToken || '';
     }
 
-    function setStoredToken(token) {
-        try {
-            localStorage.setItem(TOKEN_KEY, token);
-        } catch {
-            throw new Error('Could not store token in this browser. Try disabling private browsing.');
+    function bufferToBase64(buffer) {
+        return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    }
+
+    function base64ToBuffer(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+        return bytes;
+    }
+
+    async function deriveKey(password, saltBuffer) {
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            new TextEncoder().encode(password),
+            'PBKDF2',
+            false,
+            ['deriveKey']
+        );
+        return crypto.subtle.deriveKey(
+            { name: 'PBKDF2', salt: saltBuffer, iterations: 100000, hash: 'SHA-256' },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+        );
+    }
+
+    async function encryptToken(token, password) {
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const key = await deriveKey(password, salt);
+        const encrypted = await crypto.subtle.encrypt(
+            { name: 'AES-GCM', iv },
+            key,
+            new TextEncoder().encode(token)
+        );
+        return {
+            salt: bufferToBase64(salt),
+            iv: bufferToBase64(iv),
+            data: bufferToBase64(encrypted)
+        };
+    }
+
+    async function decryptToken(encryptedToken, password) {
+        if (!encryptedToken?.data) return '';
+        const salt = base64ToBuffer(encryptedToken.salt);
+        const iv = base64ToBuffer(encryptedToken.iv);
+        const data = base64ToBuffer(encryptedToken.data);
+        const key = await deriveKey(password, salt);
+        const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+        return new TextDecoder().decode(decrypted);
+    }
+
+    async function loadAdminConfig() {
+        const response = await fetch(`config.js?t=${Date.now()}`);
+        if (!response.ok) throw new Error('Could not load admin config.');
+        const source = await response.text();
+        window.ADMIN_CONFIG = null;
+        // eslint-disable-next-line no-new-func
+        new Function(source)();
+        if (!window.ADMIN_CONFIG) throw new Error('Admin config is invalid.');
+    }
+
+    async function unlockSession(password) {
+        sessionPassword = password;
+        sessionStorage.setItem(UNLOCK_KEY, password);
+        sessionToken = '';
+        if (window.ADMIN_CONFIG.encryptedToken) {
+            try {
+                sessionToken = await decryptToken(window.ADMIN_CONFIG.encryptedToken, password);
+            } catch {
+                sessionToken = '';
+            }
         }
     }
 
-    function clearStoredToken() {
-        localStorage.removeItem(TOKEN_KEY);
+    function lockSession() {
+        sessionPassword = null;
+        sessionToken = null;
+        sessionStorage.removeItem(UNLOCK_KEY);
+        sessionStorage.removeItem(SESSION_KEY);
     }
 
     async function sha256(message) {
@@ -63,11 +136,21 @@
     async function handleLogin(event) {
         event.preventDefault();
         const password = document.getElementById('password').value;
-        const hash = await sha256(password);
         const errorEl = document.getElementById('login-error');
+
+        try {
+            await loadAdminConfig();
+        } catch (err) {
+            errorEl.textContent = err.message;
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        const hash = await sha256(password);
 
         if (hash === window.ADMIN_CONFIG.passwordHash) {
             sessionStorage.setItem(SESSION_KEY, 'true');
+            await unlockSession(password);
             errorEl.classList.add('hidden');
             await loadContent();
             showApp();
@@ -79,7 +162,7 @@
     }
 
     function handleLogout() {
-        sessionStorage.removeItem(SESSION_KEY);
+        lockSession();
         showLogin();
         document.getElementById('password').value = '';
     }
@@ -374,21 +457,22 @@
     }
 
     function renderSettingsEditor() {
-        const tokenSet = !!getStoredToken();
+        const tokenSet = !!getActiveToken();
         return `
             <h2 class="section-title">Settings</h2>
             <div class="settings-note">
-                To save changes online, add a GitHub Personal Access Token with <strong>Contents: Read and write</strong> scope.
+                To publish changes, add a GitHub token with <strong>Contents: Read and write</strong> on your repo.
                 <a href="https://github.com/settings/tokens/new?scopes=repo&description=Brian%20Becker%20Site%20Admin" target="_blank" rel="noopener">Create a token &rarr;</a>
-                Your token is stored on this device only (not in the GitHub repo).
+                Your token is encrypted with your admin password and saved in the repo — you only enter it once.
             </div>
             ${field('GitHub Token', 'github-token', '', 'password')}
-            <p class="token-hint">${tokenSet ? '<span style="color: var(--admin-success);">✓</span> GitHub connected on this device.' : 'Connect GitHub once, then use <strong>Publish Changes</strong> to update your live site.'}</p>
+            <p class="token-hint">${tokenSet ? '<span style="color: var(--admin-success);">✓</span> GitHub connected — token stored securely in your repo.' : 'Paste your token once. It will be encrypted and saved so you don\'t need to re-enter it.'}</p>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                <button type="button" class="btn btn-primary" id="save-token">Connect &amp; Publish</button>
-                ${tokenSet ? '<button type="button" class="btn btn-secondary" id="remove-token">Disconnect</button>' : ''}
+                <button type="button" class="btn btn-primary" id="save-token">${tokenSet ? 'Update Token &amp; Publish' : 'Connect &amp; Publish'}</button>
+                ${tokenSet ? '<button type="button" class="btn btn-secondary" id="remove-token">Remove Saved Token</button>' : ''}
             </div>
             <h3 style="margin: 2rem 0 1rem;">Change Admin Password</h3>
+            ${field('Current Password', 'current-password', '', 'password')}
             ${field('New Password', 'new-password', '', 'password')}
             ${field('Confirm Password', 'confirm-password', '', 'password')}
             <button type="button" class="btn btn-secondary" id="change-password">Update Password</button>
@@ -537,7 +621,7 @@
         });
 
         document.getElementById('save-token')?.addEventListener('click', async () => {
-            const token = getVal('github-token').trim();
+            let token = getVal('github-token').trim() || getActiveToken();
             if (!token) {
                 showStatus('Paste a GitHub token first.', 'error');
                 return;
@@ -555,9 +639,20 @@
                     throw new Error('Token invalid or missing repo access.');
                 }
 
-                setStoredToken(token);
-                document.getElementById('github-token').value = '';
-                showStatus('GitHub connected. Publishing your changes…', 'info');
+                if (!sessionPassword) {
+                    throw new Error('Session expired. Log out and sign in again.');
+                }
+
+                const isNewToken = token !== getActiveToken();
+                sessionToken = token;
+                if (isNewToken) {
+                    window.ADMIN_CONFIG.encryptedToken = await encryptToken(token, sessionPassword);
+                    document.getElementById('github-token').value = '';
+                    showStatus('Token encrypted and saved. Publishing your changes…', 'info');
+                    await saveConfigToGitHub(token);
+                } else {
+                    showStatus('Publishing your changes…', 'info');
+                }
                 await publishToGitHub(token);
                 renderEditor();
             } catch (err) {
@@ -565,37 +660,63 @@
             }
         });
 
-        document.getElementById('remove-token')?.addEventListener('click', () => {
-            clearStoredToken();
-            showStatus('GitHub disconnected.', 'success');
-            renderEditor();
+        document.getElementById('remove-token')?.addEventListener('click', async () => {
+            const token = getActiveToken();
+            if (!token) {
+                showStatus('No token to remove.', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Removing saved token…', 'info');
+                sessionToken = '';
+                window.ADMIN_CONFIG.encryptedToken = null;
+                await saveConfigToGitHub(token);
+                showStatus('GitHub token removed from repo.', 'success');
+                renderEditor();
+            } catch (err) {
+                showStatus(err.message, 'error');
+            }
         });
 
         document.getElementById('change-password')?.addEventListener('click', async () => {
+            const current = getVal('current-password');
             const pw = getVal('new-password');
             const confirm = getVal('confirm-password');
-            if (!pw || pw !== confirm) {
-                showStatus('Passwords do not match.', 'error');
+
+            if (!current || !pw || pw !== confirm) {
+                showStatus('Enter your current password and matching new passwords.', 'error');
                 return;
             }
-            const hash = await sha256(pw);
-            window.ADMIN_CONFIG.passwordHash = hash;
-            pendingConfigSave = true;
 
-            const token = getStoredToken();
-            if (token) {
-                try {
-                    showStatus('Saving new password…', 'info');
-                    await saveConfigToGitHub(token);
-                    pendingConfigSave = false;
-                    showStatus('Password updated and saved.', 'success');
-                    document.getElementById('new-password').value = '';
-                    document.getElementById('confirm-password').value = '';
-                } catch (err) {
-                    showStatus(`Password updated locally but save failed: ${err.message}`, 'error');
+            const currentHash = await sha256(current);
+            if (currentHash !== window.ADMIN_CONFIG.passwordHash) {
+                showStatus('Current password is incorrect.', 'error');
+                return;
+            }
+
+            const token = getActiveToken();
+            if (!token) {
+                showStatus('Connect a GitHub token first so the new password can be saved.', 'error');
+                return;
+            }
+
+            try {
+                showStatus('Updating password…', 'info');
+                const newHash = await sha256(pw);
+                window.ADMIN_CONFIG.passwordHash = newHash;
+                if (sessionToken) {
+                    window.ADMIN_CONFIG.encryptedToken = await encryptToken(sessionToken, pw);
                 }
-            } else {
-                showStatus('Password updated. Connect GitHub in Settings to publish.', 'info');
+                sessionPassword = pw;
+                sessionStorage.setItem(UNLOCK_KEY, pw);
+                await saveConfigToGitHub(token);
+                showStatus('Password updated and saved. Use your new password next time you log in.', 'success');
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-password').value = '';
+            } catch (err) {
+                showStatus(`Password update failed: ${err.message}`, 'error');
             }
         });
 
@@ -611,11 +732,15 @@
 
     function buildConfigFile() {
         const c = window.ADMIN_CONFIG;
+        const encrypted = c.encryptedToken
+            ? JSON.stringify(c.encryptedToken)
+            : 'null';
         return `window.ADMIN_CONFIG = {
     passwordHash: '${c.passwordHash}',
     repo: '${c.repo}',
     branch: '${c.branch}',
-    contentPath: '${c.contentPath}'
+    contentPath: '${c.contentPath}',
+    encryptedToken: ${encrypted}
 };
 `;
     }
@@ -682,16 +807,11 @@
             FILE_SHA_KEY
         );
 
-        if (pendingConfigSave) {
-            await saveConfigToGitHub(token);
-            pendingConfigSave = false;
-        }
-
         showStatus('Published! Your live site updates in ~1 minute.', 'success');
     }
 
     async function saveToGitHub() {
-        const token = getStoredToken();
+        const token = getActiveToken();
         if (!token) {
             showStatus('Connect GitHub in Settings first, then click Publish Changes.', 'error');
             activeTab = 'settings';
@@ -722,18 +842,38 @@
     }
 
     async function init() {
+        try {
+            await loadAdminConfig();
+        } catch (err) {
+            document.getElementById('login-error').textContent = err.message;
+            document.getElementById('login-error').classList.remove('hidden');
+            return;
+        }
+
         document.getElementById('login-form').addEventListener('submit', handleLogin);
         document.getElementById('logout-btn')?.addEventListener('click', handleLogout);
         document.getElementById('save-btn')?.addEventListener('click', saveToGitHub);
         initTabs();
 
         if (isLoggedIn()) {
+            const savedPassword = sessionStorage.getItem(UNLOCK_KEY);
+            if (!savedPassword) {
+                lockSession();
+                return;
+            }
+
             try {
+                await unlockSession(savedPassword);
+                if (!getActiveToken() && window.ADMIN_CONFIG.encryptedToken) {
+                    lockSession();
+                    showStatus('Session expired. Please sign in again.', 'info');
+                    return;
+                }
                 await loadContent();
                 showApp();
                 renderEditor();
             } catch {
-                showLogin();
+                lockSession();
             }
         }
     }
