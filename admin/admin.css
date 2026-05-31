@@ -430,7 +430,14 @@ nav.admin-sidebar button.active {
 
 .settings-note a { color: #b45309; }
 
+.token-hint {
+    font-size: 0.85rem;
+    color: var(--admin-muted);
+    margin: -0.5rem 0 0;
+}
+
 .hidden { display: none !important; }
+
 
 code {
     font-family: ui-monospace, 'SF Mono', monospace;

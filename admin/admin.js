@@ -2,9 +2,24 @@
     const SESSION_KEY = 'siteAdminSession';
     const TOKEN_KEY = 'siteAdminGithubToken';
     const FILE_SHA_KEY = 'siteContentSha';
+    const CONFIG_SHA_KEY = 'siteConfigSha';
+    const CONFIG_PATH = 'admin/config.js';
 
     let siteData = null;
     let activeTab = 'home';
+    let pendingConfigSave = false;
+
+    function getStoredToken() {
+        return localStorage.getItem(TOKEN_KEY) || '';
+    }
+
+    function setStoredToken(token) {
+        localStorage.setItem(TOKEN_KEY, token);
+    }
+
+    function clearStoredToken() {
+        localStorage.removeItem(TOKEN_KEY);
+    }
 
     async function sha256(message) {
         const buffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
@@ -355,23 +370,24 @@
     }
 
     function renderSettingsEditor() {
-        const tokenSet = !!sessionStorage.getItem(TOKEN_KEY);
+        const tokenSet = !!getStoredToken();
         return `
             <h2 class="section-title">Settings</h2>
             <div class="settings-note">
                 To save changes online, add a GitHub Personal Access Token with <strong>Contents: Read and write</strong> scope.
                 <a href="https://github.com/settings/tokens/new?scopes=repo&description=Brian%20Becker%20Site%20Admin" target="_blank" rel="noopener">Create a token &rarr;</a>
-                Your token is stored only in this browser session.
+                Your token is stored on this device only (not in the GitHub repo).
             </div>
-            ${field('GitHub Token', 'github-token', tokenSet ? '••••••••••••••••' : '', 'password')}
-            <button type="button" class="btn btn-secondary" id="save-token">Save Token</button>
+            ${field('GitHub Token', 'github-token', '', 'password')}
+            <p class="token-hint">${tokenSet ? '<span style="color: var(--admin-success);">✓</span> Token saved on this device. Paste a new one below to replace it.' : 'Paste your token and click Save Token.'}</p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                <button type="button" class="btn btn-secondary" id="save-token">Save Token</button>
+                ${tokenSet ? '<button type="button" class="btn btn-danger" id="remove-token">Remove Token</button>' : ''}
+            </div>
             <h3 style="margin: 2rem 0 1rem;">Change Admin Password</h3>
             ${field('New Password', 'new-password', '', 'password')}
             ${field('Confirm Password', 'confirm-password', '', 'password')}
             <button type="button" class="btn btn-secondary" id="change-password">Update Password</button>
-            <p style="margin-top: 1rem; font-size: 0.85rem; color: var(--admin-muted);">
-                Password changes update <code>admin/config.js</code> locally — you'll need to save to GitHub for them to persist.
-            </p>
             <h3 style="margin: 2rem 0 1rem;">Download Backup</h3>
             <button type="button" class="btn btn-secondary" id="download-json">Download site.json</button>`;
     }
@@ -516,13 +532,38 @@
             });
         });
 
-        document.getElementById('save-token')?.addEventListener('click', () => {
-            const token = getVal('github-token');
-            if (token && !token.startsWith('••')) {
-                sessionStorage.setItem(TOKEN_KEY, token);
-                showStatus('GitHub token saved for this session.', 'success');
-                renderEditor();
+        document.getElementById('save-token')?.addEventListener('click', async () => {
+            const token = getVal('github-token').trim();
+            if (!token) {
+                showStatus('Paste a GitHub token first.', 'error');
+                return;
             }
+
+            showStatus('Verifying token…', 'info');
+
+            try {
+                const { repo } = window.ADMIN_CONFIG;
+                const response = await fetch(`https://api.github.com/repos/${repo}`, {
+                    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Token invalid or missing repo access.');
+                }
+
+                setStoredToken(token);
+                document.getElementById('github-token').value = '';
+                showStatus('GitHub token saved on this device.', 'success');
+                renderEditor();
+            } catch (err) {
+                showStatus(err.message, 'error');
+            }
+        });
+
+        document.getElementById('remove-token')?.addEventListener('click', () => {
+            clearStoredToken();
+            showStatus('GitHub token removed.', 'success');
+            renderEditor();
         });
 
         document.getElementById('change-password')?.addEventListener('click', async () => {
@@ -534,7 +575,23 @@
             }
             const hash = await sha256(pw);
             window.ADMIN_CONFIG.passwordHash = hash;
-            showStatus('Password updated in memory. Save to GitHub to persist (config.js will need manual update).', 'info');
+            pendingConfigSave = true;
+
+            const token = getStoredToken();
+            if (token) {
+                try {
+                    showStatus('Saving new password…', 'info');
+                    await saveConfigToGitHub(token);
+                    pendingConfigSave = false;
+                    showStatus('Password updated and saved.', 'success');
+                    document.getElementById('new-password').value = '';
+                    document.getElementById('confirm-password').value = '';
+                } catch (err) {
+                    showStatus(`Password updated locally but save failed: ${err.message}`, 'error');
+                }
+            } else {
+                showStatus('Password updated. Add a GitHub token, then click Save to GitHub.', 'info');
+            }
         });
 
         document.getElementById('download-json')?.addEventListener('click', () => {
@@ -547,25 +604,70 @@
         });
     }
 
-    async function getFileSha(token) {
-        const cached = sessionStorage.getItem(FILE_SHA_KEY);
-        const { repo, branch, contentPath } = window.ADMIN_CONFIG;
-        const url = `https://api.github.com/repos/${repo}/contents/${contentPath}?ref=${branch}`;
+    function buildConfigFile() {
+        const c = window.ADMIN_CONFIG;
+        return `window.ADMIN_CONFIG = {
+    passwordHash: '${c.passwordHash}',
+    repo: '${c.repo}',
+    branch: '${c.branch}',
+    contentPath: '${c.contentPath}'
+};
+`;
+    }
+
+    async function getFileSha(token, path, shaKey) {
+        const { repo, branch } = window.ADMIN_CONFIG;
+        const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`;
 
         const response = await fetch(url, {
             headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
         });
 
         if (response.status === 404) return null;
-        if (!response.ok) throw new Error('Could not fetch file info from GitHub.');
+        if (!response.ok) throw new Error(`Could not fetch ${path} from GitHub.`);
         const data = await response.json();
-        sessionStorage.setItem(FILE_SHA_KEY, data.sha);
+        sessionStorage.setItem(shaKey, data.sha);
         return data.sha;
+    }
+
+    async function putFileToGitHub(token, path, textContent, message, shaKey) {
+        const { repo, branch } = window.ADMIN_CONFIG;
+        const sha = await getFileSha(token, path, shaKey);
+        const content = btoa(unescape(encodeURIComponent(textContent)));
+
+        const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message, content, sha, branch })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || `Failed to save ${path}.`);
+        }
+
+        const result = await response.json();
+        sessionStorage.setItem(shaKey, result.content.sha);
+        return result;
+    }
+
+    async function saveConfigToGitHub(token) {
+        return putFileToGitHub(
+            token,
+            CONFIG_PATH,
+            buildConfigFile(),
+            'Update admin password via admin portal',
+            CONFIG_SHA_KEY
+        );
     }
 
     async function saveToGitHub() {
         syncCurrentTab();
-        const token = sessionStorage.getItem(TOKEN_KEY);
+        const token = getStoredToken();
         if (!token) {
             showStatus('Add your GitHub token in Settings first.', 'error');
             activeTab = 'settings';
@@ -577,32 +679,21 @@
         showStatus('Saving to GitHub…', 'info');
 
         try {
-            const { repo, branch, contentPath } = window.ADMIN_CONFIG;
-            const sha = await getFileSha(token);
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(siteData, null, 2))));
+            const { contentPath } = window.ADMIN_CONFIG;
 
-            const response = await fetch(`https://api.github.com/repos/${repo}/contents/${contentPath}`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    Accept: 'application/vnd.github+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    message: 'Update site content via admin portal',
-                    content,
-                    sha,
-                    branch
-                })
-            });
+            await putFileToGitHub(
+                token,
+                contentPath,
+                JSON.stringify(siteData, null, 2),
+                'Update site content via admin portal',
+                FILE_SHA_KEY
+            );
 
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'GitHub save failed.');
+            if (pendingConfigSave) {
+                await saveConfigToGitHub(token);
+                pendingConfigSave = false;
             }
 
-            const result = await response.json();
-            sessionStorage.setItem(FILE_SHA_KEY, result.content.sha);
             showStatus('Saved! Changes are live after GitHub Pages refreshes (usually ~1 min).', 'success');
         } catch (err) {
             showStatus(err.message, 'error');
