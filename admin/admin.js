@@ -67,25 +67,30 @@
     }
 
     async function loadAdminConfig() {
-        const response = await fetch(`config.js?t=${Date.now()}`);
+        const response = await fetch(`config.js?t=${Date.now()}`, { cache: 'no-store' });
         if (!response.ok) throw new Error('Could not load admin config.');
         const source = await response.text();
         window.ADMIN_CONFIG = null;
         // eslint-disable-next-line no-new-func
         new Function(source)();
         if (!window.ADMIN_CONFIG) throw new Error('Admin config is invalid.');
+        if (window.ADMIN_CONFIG.encryptedToken === undefined) {
+            window.ADMIN_CONFIG.encryptedToken = null;
+        }
     }
 
     async function unlockSession(password) {
         sessionPassword = password;
         sessionStorage.setItem(UNLOCK_KEY, password);
         sessionToken = '';
-        if (window.ADMIN_CONFIG.encryptedToken) {
-            try {
-                sessionToken = await decryptToken(window.ADMIN_CONFIG.encryptedToken, password);
-            } catch {
-                sessionToken = '';
-            }
+
+        if (!window.ADMIN_CONFIG.encryptedToken) return;
+
+        try {
+            sessionToken = await decryptToken(window.ADMIN_CONFIG.encryptedToken, password);
+        } catch {
+            sessionToken = '';
+            throw new Error('Could not unlock saved GitHub token. Re-enter your token in Settings.');
         }
     }
 
@@ -148,11 +153,19 @@
 
         if (hash === window.ADMIN_CONFIG.passwordHash) {
             sessionStorage.setItem(SESSION_KEY, 'true');
-            await unlockSession(password);
+            try {
+                await unlockSession(password);
+            } catch (err) {
+                // Password is correct but saved token couldn't be decrypted — still allow login
+                showStatus(err.message, 'info');
+            }
             errorEl.classList.add('hidden');
             await loadContent();
             showApp();
             renderEditor();
+            if (getActiveToken()) {
+                showStatus('Signed in — GitHub token restored.', 'success');
+            }
         } else {
             errorEl.textContent = 'Incorrect password.';
             errorEl.classList.remove('hidden');
@@ -641,17 +654,14 @@
                     throw new Error('Session expired. Log out and sign in again.');
                 }
 
-                const isNewToken = token !== getActiveToken();
                 sessionToken = token;
-                if (isNewToken) {
-                    window.ADMIN_CONFIG.encryptedToken = await encryptToken(token, sessionPassword);
-                    document.getElementById('github-token').value = '';
-                    showStatus('Token encrypted and saved. Publishing your changes…', 'info');
-                    await saveConfigToGitHub(token);
-                } else {
-                    showStatus('Publishing your changes…', 'info');
-                }
+                window.ADMIN_CONFIG.encryptedToken = await encryptToken(token, sessionPassword);
+                document.getElementById('github-token').value = '';
+                showStatus('Saving encrypted token…', 'info');
+                await saveConfigToGitHub(token);
+                showStatus('Token saved. Publishing your changes…', 'info');
                 await publishToGitHub(token);
+                await loadAdminConfig();
                 renderEditor();
             } catch (err) {
                 showStatus(err.message, 'error');
@@ -877,11 +887,11 @@
             }
 
             try {
-                await unlockSession(savedPassword);
-                if (!getActiveToken() && window.ADMIN_CONFIG.encryptedToken) {
-                    lockSession();
-                    showStatus('Session expired. Please sign in again.', 'info');
-                    return;
+                await loadAdminConfig();
+                try {
+                    await unlockSession(savedPassword);
+                } catch (err) {
+                    showStatus(err.message, 'info');
                 }
                 await loadContent();
                 showApp();
