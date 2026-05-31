@@ -76,11 +76,18 @@
     "experiencesSectionTitle": "Experience",
     "experiences": [
       {
+        "id": "exp-1780201898077",
+        "title": "Dr. Azzam Lab",
+        "org": "Azzam Lab – Florida International University",
+        "description": "Interning at the Azzam Lab at Florida International University, contributing to cancer research focused on functional precision medicine and personalized therapeutic strategies. Assisting with laboratory research, data analysis, and scientific review related to cancer stem cells, drug sensitivity testing, and translational oncology projects while gaining hands-on experience in a collaborative biomedical research environment.",
+        "image": "images/fiu.jpg"
+      },
+      {
         "id": "exp-1",
         "title": "Physician Shadow",
         "org": "Murray Ocular Oncology and Retina (Aug 2021 - Present)",
         "description": "I have shadowed Dr. Murray for over 4 years, gaining invaluable research experience. During this time, I learned to use advanced technological equipment such as the Optos for eye imaging and how to interpret OCT scans.",
-        "image": "images/fiu.jpg"
+        "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRq3PEKxwvJ6XtGUlVR8gWuc6p7i9IC3Pi8gQ&s"
       }
     ]
   },
