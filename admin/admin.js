@@ -14,7 +14,11 @@
     }
 
     function setStoredToken(token) {
-        localStorage.setItem(TOKEN_KEY, token);
+        try {
+            localStorage.setItem(TOKEN_KEY, token);
+        } catch {
+            throw new Error('Could not store token in this browser. Try disabling private browsing.');
+        }
     }
 
     function clearStoredToken() {
@@ -379,10 +383,10 @@
                 Your token is stored on this device only (not in the GitHub repo).
             </div>
             ${field('GitHub Token', 'github-token', '', 'password')}
-            <p class="token-hint">${tokenSet ? '<span style="color: var(--admin-success);">✓</span> Token saved on this device. Paste a new one below to replace it.' : 'Paste your token and click Save Token.'}</p>
+            <p class="token-hint">${tokenSet ? '<span style="color: var(--admin-success);">✓</span> GitHub connected on this device.' : 'Connect GitHub once, then use <strong>Publish Changes</strong> to update your live site.'}</p>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                <button type="button" class="btn btn-secondary" id="save-token">Save Token</button>
-                ${tokenSet ? '<button type="button" class="btn btn-danger" id="remove-token">Remove Token</button>' : ''}
+                <button type="button" class="btn btn-primary" id="save-token">Connect &amp; Publish</button>
+                ${tokenSet ? '<button type="button" class="btn btn-secondary" id="remove-token">Disconnect</button>' : ''}
             </div>
             <h3 style="margin: 2rem 0 1rem;">Change Admin Password</h3>
             ${field('New Password', 'new-password', '', 'password')}
@@ -553,7 +557,8 @@
 
                 setStoredToken(token);
                 document.getElementById('github-token').value = '';
-                showStatus('GitHub token saved on this device.', 'success');
+                showStatus('GitHub connected. Publishing your changes…', 'info');
+                await publishToGitHub(token);
                 renderEditor();
             } catch (err) {
                 showStatus(err.message, 'error');
@@ -562,7 +567,7 @@
 
         document.getElementById('remove-token')?.addEventListener('click', () => {
             clearStoredToken();
-            showStatus('GitHub token removed.', 'success');
+            showStatus('GitHub disconnected.', 'success');
             renderEditor();
         });
 
@@ -590,7 +595,7 @@
                     showStatus(`Password updated locally but save failed: ${err.message}`, 'error');
                 }
             } else {
-                showStatus('Password updated. Add a GitHub token, then click Save to GitHub.', 'info');
+                showStatus('Password updated. Connect GitHub in Settings to publish.', 'info');
             }
         });
 
@@ -665,36 +670,40 @@
         );
     }
 
-    async function saveToGitHub() {
+    async function publishToGitHub(token) {
         syncCurrentTab();
+        const { contentPath } = window.ADMIN_CONFIG;
+
+        await putFileToGitHub(
+            token,
+            contentPath,
+            JSON.stringify(siteData, null, 2),
+            'Update site content via admin portal',
+            FILE_SHA_KEY
+        );
+
+        if (pendingConfigSave) {
+            await saveConfigToGitHub(token);
+            pendingConfigSave = false;
+        }
+
+        showStatus('Published! Your live site updates in ~1 minute.', 'success');
+    }
+
+    async function saveToGitHub() {
         const token = getStoredToken();
         if (!token) {
-            showStatus('Add your GitHub token in Settings first.', 'error');
+            showStatus('Connect GitHub in Settings first, then click Publish Changes.', 'error');
             activeTab = 'settings';
             document.querySelectorAll('#nav-tabs button').forEach((b) => b.classList.toggle('active', b.dataset.tab === 'settings'));
             renderEditor();
             return;
         }
 
-        showStatus('Saving to GitHub…', 'info');
+        showStatus('Publishing to your live site…', 'info');
 
         try {
-            const { contentPath } = window.ADMIN_CONFIG;
-
-            await putFileToGitHub(
-                token,
-                contentPath,
-                JSON.stringify(siteData, null, 2),
-                'Update site content via admin portal',
-                FILE_SHA_KEY
-            );
-
-            if (pendingConfigSave) {
-                await saveConfigToGitHub(token);
-                pendingConfigSave = false;
-            }
-
-            showStatus('Saved! Changes are live after GitHub Pages refreshes (usually ~1 min).', 'success');
+            await publishToGitHub(token);
         } catch (err) {
             showStatus(err.message, 'error');
         }
