@@ -1,8 +1,6 @@
 (function () {
     const SESSION_KEY = 'siteAdminSession';
     const UNLOCK_KEY = 'siteAdminUnlock';
-    const FILE_SHA_KEY = 'siteContentSha';
-    const CONFIG_SHA_KEY = 'siteConfigSha';
     const CONFIG_PATH = 'admin/config.js';
 
     let siteData = null;
@@ -745,44 +743,62 @@
 `;
     }
 
-    async function getFileSha(token, path, shaKey) {
+    async function getFileSha(token, path) {
         const { repo, branch } = window.ADMIN_CONFIG;
-        const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`;
+        const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}&t=${Date.now()}`;
 
         const response = await fetch(url, {
-            headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+            headers: {
+                Authorization: `Bearer ${token}`,
+                Accept: 'application/vnd.github.v3+json',
+                'Cache-Control': 'no-cache'
+            },
+            cache: 'no-store'
         });
 
         if (response.status === 404) return null;
         if (!response.ok) throw new Error(`Could not fetch ${path} from GitHub.`);
         const data = await response.json();
-        sessionStorage.setItem(shaKey, data.sha);
         return data.sha;
     }
 
-    async function putFileToGitHub(token, path, textContent, message, shaKey) {
+    async function putFileToGitHub(token, path, textContent, message) {
         const { repo, branch } = window.ADMIN_CONFIG;
-        const sha = await getFileSha(token, path, shaKey);
         const content = btoa(unescape(encodeURIComponent(textContent)));
+        let lastError = null;
 
-        const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-            method: 'PUT',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ message, content, sha, branch })
-        });
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+            const sha = await getFileSha(token, path);
+            const body = { message, content, branch };
+            if (sha) body.sha = sha;
 
-        if (!response.ok) {
+            const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
+
+            if (response.ok) {
+                return response.json();
+            }
+
             const err = await response.json();
-            throw new Error(err.message || `Failed to save ${path}.`);
+            lastError = err.message || `Failed to save ${path}.`;
+
+            // File changed on GitHub between read and write — refetch sha and retry
+            if (response.status === 409 && attempt < 2) {
+                await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+                continue;
+            }
+
+            throw new Error(lastError);
         }
 
-        const result = await response.json();
-        sessionStorage.setItem(shaKey, result.content.sha);
-        return result;
+        throw new Error(lastError || `Failed to save ${path}.`);
     }
 
     async function saveConfigToGitHub(token) {
@@ -790,8 +806,7 @@
             token,
             CONFIG_PATH,
             buildConfigFile(),
-            'Update admin password via admin portal',
-            CONFIG_SHA_KEY
+            'Update admin settings via admin portal'
         );
     }
 
@@ -803,8 +818,7 @@
             token,
             contentPath,
             JSON.stringify(siteData, null, 2),
-            'Update site content via admin portal',
-            FILE_SHA_KEY
+            'Update site content via admin portal'
         );
 
         showStatus('Published! Your live site updates in ~1 minute.', 'success');
