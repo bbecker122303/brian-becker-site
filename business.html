@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <!-- I kind of like this and feel like I will actually use this as a personal site in the future so preventing crawling to the FIU url -->
     <title>Business | Brian Becker</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="business">
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -20,29 +19,26 @@
     </nav>
 
     <header style="text-align: center;">
-        <h1>Business Ventures</h1>
-        <p class="subtitle">Innovation in Out-of-Home Advertising.</p>
+        <h1 data-content="business.header.title">Business Ventures</h1>
+        <p class="subtitle" data-content="business.header.subtitle">Innovation in Out-of-Home Advertising.</p>
     </header>
 
     <main>
-        <!-- Vue Section -->
         <section>
             <div class="container">
                 <div class="grid-2">
                     <div style="text-align: center;">
-                        <h2>Vue - Digital Billboards</h2>
-                        <p class="subtitle">The World's First iOS Native Billboard Booking App.</p>
-                        <p><strong>Owned by Elite Marketing Outdoor</strong></p>
-                        <ul class="bullet-list">
-                            <li>I solely founded Vue Billboards, pioneering a programmatic billboard booking platform accessible via iOS and web applications.</li>
-                            <li>Solo-developed a groundbreaking iOS and web app utilizing Swift, HTML, JavaScript, CSS, and React, integrating Firebase and AWS for enhanced performance.</li>
-                            <li>Managed campaign placements and provided exceptional customer support, ensuring user satisfaction and operational efficiency.</li>
+                        <h2 data-content="vue.title">Vue - Digital Billboards</h2>
+                        <p class="subtitle" data-content="vue.subtitle">The World's First iOS Native Billboard Booking App.</p>
+                        <p><strong data-content="vue.ownerNote">Owned by Elite Marketing Outdoor</strong></p>
+                        <ul class="bullet-list" data-content="vue.bullets">
+                            <li>I solely founded Vue Billboards.</li>
                         </ul>
-                        <p><a href="https://vuebillboards.com" target="_blank" class="btn">Visit Website &rarr;</a></p>
+                        <p><a href="https://vuebillboards.com" target="_blank" class="btn" data-content="vue.website">Visit Website &rarr;</a></p>
                     </div>
                     <div style="text-align: center;">
                         <h3 style="margin-bottom: 10px;">View Vue Wrapped 2025</h3>
-                        <video controls style="border: 1px solid #ccc; max-height: 500px; width: auto; max-width: 100%; display: block; margin: 0 auto;">
+                        <video controls style="border: 1px solid #ccc; max-height: 500px; width: auto; max-width: 100%; display: block; margin: 0 auto;" data-content="vue.video">
                             <source src="images/wrapped.mp4" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
@@ -51,31 +47,28 @@
             </div>
         </section>
 
-        <!-- Elite Section -->
         <section id="elite" style="background-color: #f9f9f9;">
             <div class="container">
                 <div class="grid-2">
-                    <img src="images/TSQ.jpeg" alt="Elite Marketing Outdoor - Times Square Billboard">
+                    <img src="images/TSQ.jpeg" alt="Elite Marketing Outdoor - Times Square Billboard" data-content="elite.image">
                     <div style="text-align: center;">
-                        <h2>Elite Marketing Outdoor</h2>
-                        <p class="subtitle">Billboard Agency.</p>
-                        <p>My marketing agency specializes in digital outdoor advertising options such as billboards, Gym TVs, Mall Kiosks, and billboard boats. At Elite Marketing, we specialize exclusively in innovative out-of-home (OOH) advertising solutions powered by advanced programmatic buying strategies to maximize reach and results.</p>
-                        <ul class="bullet-list">
-                            <li>We also own Vue Billboards, our technology company, which provides cutting-edge OOH tech and data capabilities—giving our clients unmatched targeting precision and campaign performance.</li>
-                            <li>I am the sole founder and have an active, hands-on role in the business, personally leading initial discovery consultations, overseeing campaign strategy, and managing client accounts to ensure every project delivers measurable impact.</li>
+                        <h2 data-content="elite.title">Elite Marketing Outdoor</h2>
+                        <p class="subtitle" data-content="elite.subtitle">Billboard Agency.</p>
+                        <p data-content="elite.body">My marketing agency specializes in digital outdoor advertising.</p>
+                        <ul class="bullet-list" data-content="elite.bullets">
+                            <li>We also own Vue Billboards.</li>
                         </ul>
-                        <p><a href="https://elitemarketing.agency" target="_blank" class="btn btn-outline">Learn More</a></p>
+                        <p><a href="https://elitemarketing.agency" target="_blank" class="btn btn-outline" data-content="elite.website">Learn More</a></p>
                     </div>
                 </div>
             </div>
         </section>
-
     </main>
 
     <footer>
-        <p>&copy; 2025 Brian Becker. All Rights Reserved.</p>
-        <p><a href="mailto:bbecker@fiu.edu">bbecker@fiu.edu</a></p>
+        <p data-content="footer.copyright">&copy; 2025 Brian Becker. All Rights Reserved.</p>
+        <p><a href="mailto:bbecker@fiu.edu" data-content="footer.emailLink">bbecker@fiu.edu</a></p>
     </footer>
+    <script src="js/content.js"></script>
 </body>
 </html>
-

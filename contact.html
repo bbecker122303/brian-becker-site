@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <!-- I kind of like this and feel like I will actually use this as a personal site in the future so preventing crawling to the FIU url -->
     <title>Contact | Brian Becker</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="contact">
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -20,23 +19,23 @@
     </nav>
 
     <header>
-        <h1>Contact Me</h1>
-        <p class="subtitle">Let's start a conversation.</p>
+        <h1 data-content="contact.header.title">Contact Me</h1>
+        <p class="subtitle" data-content="contact.header.subtitle">Let's start a conversation.</p>
     </header>
 
     <main>
         <section>
             <div class="container">
-                <p style="text-align: center; max-width: 600px; margin: 0 auto 30px;">Get in touch.</p>
+                <p style="text-align: center; max-width: 600px; margin: 0 auto 30px;" data-content="contact.intro">Get in touch.</p>
                 
                 <div style="text-align: center; padding: 20px; background-color: var(--section-bg); border-radius: 8px; max-width: 600px; margin: 0 auto;">
                     <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">
                         <strong>Email:</strong><br>
-                        <a href="mailto:bbecker@fiu.edu">bbecker@fiu.edu</a>
+                        <a href="mailto:bbecker@fiu.edu" data-content="contact.emailLink">bbecker@fiu.edu</a>
                     </p>
                     <p style="font-size: 1.2rem;">
                         <strong>Phone:</strong><br>
-                        <a href="tel:9545514923">(954) 551-4923</a>
+                        <a href="tel:9545514923" data-content="contact.phoneLink">(954) 551-4923</a>
                     </p>
                 </div>
 
@@ -65,8 +64,9 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Brian Becker. All Rights Reserved.</p>
-        <p><a href="mailto:bbecker@fiu.edu">bbecker@fiu.edu</a></p>
+        <p data-content="footer.copyright">&copy; 2025 Brian Becker. All Rights Reserved.</p>
+        <p><a href="mailto:bbecker@fiu.edu" data-content="footer.emailLink">bbecker@fiu.edu</a></p>
     </footer>
+    <script src="js/content.js"></script>
 </body>
 </html>

@@ -4,16 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <!-- I kind of like this and feel like I will actually use this as a personal site in the future so preventing crawling to the FIU url -->
     <title>Brian Becker</title>
-    <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
-    <!-- <style>
-        body { background-color: blue; } 
-    </style> -->
 </head>
-<body>
-    <!-- Main Navigation Bar -->
+<body data-page="home">
     <nav>
         <ul>
             <li><a href="index.html" class="active">Home</a></li>
@@ -24,73 +18,28 @@
         </ul>
     </nav>
 
-    <!-- Header / Hero Section -->
     <header>
         <div class="grid-2">
             <div>
-                <h1>Brian Becker</h1>
-                <p class="subtitle">Owneer / Founder of Elite Marketing & Pre Medical Student at Florida International University.</p>
-                <!-- <p>Old bio goes here...</p> -->
-                <p>Focused on innovation in Out-of-Home advertising and focusing on studying Oncology research.</p>
-                <a href="contact.html" class="btn">Get in Touch</a>
+                <h1 data-content="home.hero.title">Brian Becker</h1>
+                <p class="subtitle" data-content="home.hero.subtitle">Owneer / Founder of Elite Marketing & Pre Medical Student at Florida International University.</p>
+                <p data-content="home.hero.bio">Focused on innovation in Out-of-Home advertising and focusing on studying Oncology research.</p>
+                <a href="contact.html" class="btn" data-content="home.hero.cta">Get in Touch</a>
             </div>
             <div style="text-align: center;">
-                 <!-- Profile Image -->
-                <img src="images/headshot.jpeg" alt="Brian Becker" class="profile-img" style="margin: 0 auto;">
+                <img src="images/headshot.jpeg" alt="Brian Becker" class="profile-img" style="margin: 0 auto;" data-content="home.hero.profileImage">
             </div>
         </div>
     </header>
 
-    <main>
-        <!-- Detailed Feature: Vue -->
-        <section>
-            <div class="container">
-                <div class="grid-2">
-                    <div>
-                        <h2>Vue - Digital Billboards</h2>
-                        <p class="subtitle">The World's First iOS Native Billboard Booking App.</p>
-                        <p>Vue Billboards is a new OOH DSP partnered with Perion (NASDAQ: PERI) delivering digital billboard access to anyone with the worlds first iOS native OOH app. We also work with agencies of all sizes to deliver billboard campaigns at a low tech fee.</p>
-                        <a href="business.html" class="btn btn-outline">See the App</a>
-                    </div>
-                    <img src="images/Vue.jpeg" alt="Vue App Interface">
-                </div>
-            </div>
-        </section>
-
-        <!-- Detailed Feature: Elite Marketing -->
-        <section style="background-color: #f9f9f9;">
-            <div class="container">
-                <div class="grid-2">
-                    <img src="images/TSQ.jpeg" alt="Elite Marketing Outdoor - Times Square Billboard">
-                    <div>
-                        <h2>Elite Marketing Outdoor</h2>
-                        <p class="subtitle">Billboard Agency.</p>
-                        <p>Elite Marketing Outdoor, LLC, which owns Vue Billboards, specializes in planning and executing large scale billboard campaigns. From small companies to large national brands, Elite Marketing uses our own proprietary DSP to deliver billboard campaigns at an exceptionally low tech fee.</p>
-                        <a href="business.html#elite" class="btn btn-outline">Learn More</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Detailed Feature: Medical Publications -->
-        <section>
-            <div class="container">
-                <div class="grid-2">
-                    <div>
-                        <h2>Medical Research & Publications</h2>
-                        <p class="subtitle">Pre Medical - Planning to specialize in Surgical Oncology.</p>
-                        <p>As a childhood cancer survivor, I am passionate about contributing to Oncology research. I plan to specialize in Surgical Oncology and have contributed to some ocular oncology research.</p>
-                        <a href="med.html" class="btn btn-outline">Read Publications</a>
-                    </div>
-                    <img src="images/med.jpg" alt="Medical Publications">
-                </div>
-            </div>
-        </section>
+    <main id="home-sections">
+        <!-- Rendered from content/site.json -->
     </main>
 
     <footer>
-        <p>&copy; 2025 Brian Becker. All Rights Reserved.</p>
-        <p><a href="mailto:bbecker@fiu.edu">bbecker@fiu.edu</a></p>
+        <p data-content="footer.copyright">&copy; 2025 Brian Becker. All Rights Reserved.</p>
+        <p><a href="mailto:bbecker@fiu.edu" data-content="footer.emailLink">bbecker@fiu.edu</a></p>
     </footer>
+    <script src="js/content.js"></script>
 </body>
 </html>

@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex">
-    <!-- I kind of like this and feel like I will actually use this as a personal site in the future so preventing crawling to the FIU url -->
     <title>Medical | Brian Becker</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-page="med">
     <nav>
         <ul>
             <li><a href="index.html">Home</a></li>
@@ -20,18 +19,17 @@
     </nav>
 
     <header>
-        <h1>Medical Research</h1>
-        <p class="subtitle">Pre Medical - Planning to specialize in Surgical Oncology.</p>
+        <h1 data-content="med.header.title">Medical Research</h1>
+        <p class="subtitle" data-content="med.header.subtitle">Pre Medical - Planning to specialize in Surgical Oncology.</p>
     </header>
 
     <main>
         <section>
             <div class="container">
                 <div class="grid-2">
-                    <div>
+                    <div data-content="med.about">
                         <h2>About My Journey</h2>
-                        <p>As a childhood cancer survivor, I am passionate about contributing to Oncology research. I plan to specialize in Surgical Oncology and have contributed to some ocular oncology research.</p>
-                        <p>My academic journey is driven by a desire to improve patient outcomes through rigorous scientific inquiry and compassion.</p>
+                        <p>As a childhood cancer survivor, I am passionate about contributing to Oncology research.</p>
                     </div>
                     <img src="images/med.jpg" alt="Medical Research">
                 </div>
@@ -41,36 +39,17 @@
         <section style="background-color: #f9f9f9;">
             <div class="container">
                 <h2>Publications</h2>
-                <div class="grid-2" style="grid-template-columns: 1fr; gap: 30px;">
-                    <div class="card">
-                        <h3>Genome Sequence of Three Siphoviruses in the EE, GA and EA5 Actinobacteriophage Clusters: Biscayne, Bush and GreenIvy</h3>
-                        <p><em>MicroPubl Biol, January 26, 2025</em></p>
-                        <p>Bacteriophages Biscayne, Bush and GreenIvy were isolated from soil samples in Miami, FL using Microbacterium foliorum NRRL B-24224 as host. Transmission electron microscopy shows siphoviral morphologies for all three phages. Based on gene content similarity to other actinobacteriophages, they are assigned to the EE, GA and EA5 clusters, respectively.</p>
-                        <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11749239/" target="_blank" class="btn btn-outline">Read Publication</a>
-                    </div>
-                    <div class="card">
-                        <h3>Circumscribed Choroidal Hemangioma Simulating Choroidal Melanoma on Advanced Ultrawide-field Pseudocolor Retinal Imaging: A Case Series</h3>
-                        <span class="badge">First Author</span>
-                        <p><em>Ophthalmic Surgery, Lasers and Imaging Retina, April 23, 2023</em></p>
-                        <p>The purpose of this case series was to evaluate the features of circumscribed choroidal hemangioma on pseudocolor ultrawide-field (UWF) retinal images simulating choroidal melanoma and compare it to fundoscopic appearance. All four patients underwent full ophthalmological examination, including dilated fundus examination, ultrasonography, and UWF imaging (UWFI). All circumscribed choroidal hemangioma appeared clinically as orange-red choroidal lesions which were echodense with regular internal structure on ultrasonography. All lesions appeared green-grey in color on pseudocolor UWFI. Pseudocolor UWFI of circumscribed choroidal hemangioma represents distortion of true color appearance and may simulate choroidal melanoma.</p>
-                        <a href="https://journals.healio.com/doi/10.3928/23258160-20230403-01" target="_blank" class="btn btn-outline">Read Publication</a>
-                    </div>
-                    <div class="card">
-                        <h3>Erdafitinib-Induced Secondary Maculopathy</h3>
-                        <span class="badge">First Author</span>
-                        <p><em>Journal of VitreoRetinal Diseases, June 3, 2022</em></p>
-                        <p>This work presents a case of secondary maculopathy associated with the use of erdafitinib (Balversa) for the management of bladder urothelial carcinoma with bony metastasis.</p>
-                        <a href="https://journals.sagepub.com/doi/10.1177/24741264221092908" target="_blank" class="btn btn-outline">Read Publication</a>
-                    </div>
+                <div class="grid-2" style="grid-template-columns: 1fr; gap: 30px;" id="publications-list">
+                    <!-- Rendered from content/site.json -->
                 </div>
             </div>
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2025 Brian Becker. All Rights Reserved.</p>
-        <p><a href="mailto:bbecker@fiu.edu">bbecker@fiu.edu</a></p>
+        <p data-content="footer.copyright">&copy; 2025 Brian Becker. All Rights Reserved.</p>
+        <p><a href="mailto:bbecker@fiu.edu" data-content="footer.emailLink">bbecker@fiu.edu</a></p>
     </footer>
+    <script src="js/content.js"></script>
 </body>
 </html>
-
