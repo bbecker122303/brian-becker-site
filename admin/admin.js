@@ -206,12 +206,16 @@
     }
 
     function normalizeAbout(about) {
+        if (!about) return;
+        if (!about.header) about.header = { title: '', subtitle: '' };
+        if (!about.education) about.education = [];
+        if (!about.certifications) about.certifications = [];
         if (!about.experiences?.length && about.volunteer) {
             about.experiences = [{
                 id: 'exp-1',
-                title: about.volunteer.title,
-                org: about.volunteer.org,
-                description: about.volunteer.description,
+                title: about.volunteer.title || '',
+                org: about.volunteer.org || '',
+                description: about.volunteer.description || '',
                 image: about.volunteer.image || ''
             }];
             delete about.volunteer;
@@ -313,6 +317,7 @@
     }
 
     function renderAboutEditor() {
+        normalizeSiteData();
         const a = siteData.about;
         return `
             <h2 class="section-title">About Page</h2>
@@ -353,7 +358,8 @@
     }
 
     function experienceItem(exp, i) {
-        const total = siteData.about.experiences.length;
+        if (!exp) exp = { id: `exp-${i}`, title: '', org: '', description: '', image: '' };
+        const total = (siteData.about.experiences || []).length;
         return `
             <div class="list-item" data-exp-index="${i}">
                 <div class="list-item-header">
@@ -377,13 +383,13 @@
         siteData.about.header.subtitle = getVal('about-header-subtitle');
         siteData.about.banner = getVal('about-banner');
 
-        siteData.about.education = siteData.about.education.map((_, i) => ({
+        siteData.about.education = (siteData.about.education || []).map((_, i) => ({
             institution: getVal(`edu-${i}-institution`),
             location: getVal(`edu-${i}-location`),
             years: getVal(`edu-${i}-years`)
         }));
 
-        siteData.about.certifications = siteData.about.certifications.map((_, i) => ({
+        siteData.about.certifications = (siteData.about.certifications || []).map((_, i) => ({
             name: getVal(`cert-${i}-name`),
             organization: getVal(`cert-${i}-organization`)
         }));
@@ -611,6 +617,8 @@
     }
 
     function renderEditor() {
+        normalizeSiteData();
+
         const editors = {
             home: renderHomeEditor,
             about: renderAboutEditor,

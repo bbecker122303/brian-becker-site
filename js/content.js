@@ -51,6 +51,10 @@
     }
 
     function normalizeAbout(about) {
+        if (!about) return about;
+        if (!about.header) about.header = { title: '', subtitle: '' };
+        if (!about.education) about.education = [];
+        if (!about.certifications) about.certifications = [];
         if (!about.experiences?.length && about.volunteer) {
             about.experiences = [{
                 id: 'exp-1',
