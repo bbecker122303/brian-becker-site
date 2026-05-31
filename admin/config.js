@@ -3,5 +3,5 @@ window.ADMIN_CONFIG = {
     repo: 'bbecker122303/brian-becker-site',
     branch: 'main',
     contentPath: 'content/site.json',
-    encryptedToken: {"salt":"FrYOLA9+NlxU5PqTrCEfAA==","iv":"tAis9Exle0a1jwuV","data":"MlItv9k35rIZa1RPSwxBnpAEiIuqS2G98+27iCgdJlLv4BO5R4zXalNvtQJAtfTirTKd5fZepHDPh+EpD0v8s8WAq6qS0OH8OdO3mn0vQ7zjCaqUgSYVzPS5BtgjAp4Zed59HZxiromeSejBQQ=="}
+    encryptedToken: {"salt":"T/cBG96NHddAqAyU1lFnpQ==","iv":"pCI0NvF4XrK/OM9G","data":"hDmjbzPNjQyVEPC5oqoUDRc276MuUC8MnMYcy8uz1KEfMVX83i6J2nTcAiOtDWYSik+S/9004PGKINzBXBq0qZt8Ds7qxmOxxtVUt5MRffOpvGLnDoYd6PVq36Jb3fwovIoxxh3z/ZlZCG/X7g=="}
 };
