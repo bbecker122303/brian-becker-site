@@ -202,6 +202,26 @@
         const response = await fetch(`../${window.ADMIN_CONFIG.contentPath}?t=${Date.now()}`);
         if (!response.ok) throw new Error('Could not load site content.');
         siteData = await response.json();
+        normalizeSiteData();
+    }
+
+    function normalizeAbout(about) {
+        if (!about.experiences?.length && about.volunteer) {
+            about.experiences = [{
+                id: 'exp-1',
+                title: about.volunteer.title,
+                org: about.volunteer.org,
+                description: about.volunteer.description,
+                image: about.volunteer.image || ''
+            }];
+            delete about.volunteer;
+        }
+        if (!about.experiences) about.experiences = [];
+        if (!about.experiencesSectionTitle) about.experiencesSectionTitle = 'Experience';
+    }
+
+    function normalizeSiteData() {
+        if (siteData?.about) normalizeAbout(siteData.about);
     }
 
     function field(label, id, value, type = 'text', rows) {
@@ -324,11 +344,31 @@
                     ${field('Organization', `cert-${i}-organization`, row.organization)}
                 </div>`).join('')}
             <button type="button" class="btn btn-secondary" id="add-cert">+ Add Certification</button>
-            <h3 style="margin: 2rem 0 1rem;">Volunteer Experience</h3>
-            ${field('Title', 'volunteer-title', a.volunteer.title)}
-            ${field('Organization & Dates', 'volunteer-org', a.volunteer.org)}
-            ${field('Description', 'volunteer-description', a.volunteer.description, 'textarea', 4)}
-            ${field('Image Path', 'volunteer-image', a.volunteer.image)}`;
+            <h3 style="margin: 2rem 0 1rem;">Internships &amp; Experience</h3>
+            ${field('Section Title', 'experiences-section-title', a.experiencesSectionTitle || 'Experience')}
+            <div id="experiences-editor">
+                ${(a.experiences || []).map((exp, i) => experienceItem(exp, i)).join('')}
+            </div>
+            <button type="button" class="btn btn-secondary" id="add-experience">+ Add Experience</button>`;
+    }
+
+    function experienceItem(exp, i) {
+        const total = siteData.about.experiences.length;
+        return `
+            <div class="list-item" data-exp-index="${i}">
+                <div class="list-item-header">
+                    <strong>Entry ${i + 1}${exp.title ? `: ${escapeHtml(exp.title)}` : ''}</strong>
+                    <div class="list-item-actions">
+                        <button type="button" class="btn btn-secondary btn-sm" data-exp-up="${i}" ${i === 0 ? 'disabled' : ''}>&uarr;</button>
+                        <button type="button" class="btn btn-secondary btn-sm" data-exp-down="${i}" ${i === total - 1 ? 'disabled' : ''}>&darr;</button>
+                        <button type="button" class="btn btn-danger btn-sm" data-remove-exp="${i}">Remove</button>
+                    </div>
+                </div>
+                ${field('Title', `exp-${i}-title`, exp.title)}
+                ${field('Organization & Dates', `exp-${i}-org`, exp.org)}
+                ${field('Description', `exp-${i}-description`, exp.description, 'textarea', 4)}
+                ${field('Image Path (optional)', `exp-${i}-image`, exp.image || '')}
+            </div>`;
     }
 
     function syncAbout() {
@@ -348,12 +388,15 @@
             organization: getVal(`cert-${i}-organization`)
         }));
 
-        siteData.about.volunteer = {
-            title: getVal('volunteer-title'),
-            org: getVal('volunteer-org'),
-            description: getVal('volunteer-description'),
-            image: getVal('volunteer-image')
-        };
+        siteData.about.experiencesSectionTitle = getVal('experiences-section-title') || 'Experience';
+        siteData.about.experiences = (siteData.about.experiences || []).map((exp, i) => ({
+            id: exp.id || `exp-${Date.now()}-${i}`,
+            title: getVal(`exp-${i}-title`),
+            org: getVal(`exp-${i}-org`),
+            description: getVal(`exp-${i}-description`),
+            image: getVal(`exp-${i}-image`)
+        }));
+        delete siteData.about.volunteer;
     }
 
     function renderMedEditor() {
@@ -546,7 +589,13 @@
                 <h3>${escapeHtml(siteData.about.header.title)}</h3>
                 <p>${escapeHtml(siteData.about.banner)}</p>
                 <p><strong>Education:</strong> ${siteData.about.education.length} entries</p>
-                <p><strong>Certifications:</strong> ${siteData.about.certifications.length} entries</p>`;
+                <p><strong>Certifications:</strong> ${siteData.about.certifications.length} entries</p>
+                <p><strong>Experience:</strong> ${(siteData.about.experiences || []).length} entries</p>
+                ${(siteData.about.experiences || []).map((exp) => `
+                    <div class="preview-card">
+                        <strong>${escapeHtml(exp.title)}</strong>
+                        <p class="subtitle">${escapeHtml(exp.org)}</p>
+                    </div>`).join('')}`;
         } else if (activeTab === 'business') {
             preview.innerHTML = `
                 <div class="preview-card"><strong>${escapeHtml(siteData.business.vue.title)}</strong><p class="subtitle">${escapeHtml(siteData.business.vue.subtitle)}</p></div>
@@ -647,6 +696,44 @@
             btn.addEventListener('click', () => {
                 syncAbout();
                 siteData.about.certifications.splice(parseInt(btn.dataset.removeCert, 10), 1);
+                renderEditor();
+            });
+        });
+
+        document.getElementById('add-experience')?.addEventListener('click', () => {
+            syncAbout();
+            siteData.about.experiences.push({
+                id: `exp-${Date.now()}`,
+                title: 'New Internship',
+                org: 'Organization (Dates)',
+                description: 'Describe your role and what you learned.',
+                image: ''
+            });
+            renderEditor();
+        });
+
+        document.querySelectorAll('[data-remove-exp]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                syncAbout();
+                siteData.about.experiences.splice(parseInt(btn.dataset.removeExp, 10), 1);
+                renderEditor();
+            });
+        });
+
+        document.querySelectorAll('[data-exp-up]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                syncAbout();
+                const i = parseInt(btn.dataset.expUp, 10);
+                [siteData.about.experiences[i - 1], siteData.about.experiences[i]] = [siteData.about.experiences[i], siteData.about.experiences[i - 1]];
+                renderEditor();
+            });
+        });
+
+        document.querySelectorAll('[data-exp-down]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                syncAbout();
+                const i = parseInt(btn.dataset.expDown, 10);
+                [siteData.about.experiences[i], siteData.about.experiences[i + 1]] = [siteData.about.experiences[i + 1], siteData.about.experiences[i]];
                 renderEditor();
             });
         });

@@ -73,12 +73,16 @@
         "organization": "Adobe"
       }
     ],
-    "volunteer": {
-      "title": "Physician Shadow",
-      "org": "Murray Ocular Oncology and Retina (Aug 2021 - Present)",
-      "description": "I have shadowed Dr. Murray for over 4 years, gaining invaluable research experience. During this time, I learned to use advanced technological equipment such as the Optos for eye imaging and how to interpret OCT scans.",
-      "image": "images/fiu.jpg"
-    }
+    "experiencesSectionTitle": "Experience",
+    "experiences": [
+      {
+        "id": "exp-1",
+        "title": "Physician Shadow",
+        "org": "Murray Ocular Oncology and Retina (Aug 2021 - Present)",
+        "description": "I have shadowed Dr. Murray for over 4 years, gaining invaluable research experience. During this time, I learned to use advanced technological equipment such as the Optos for eye imaging and how to interpret OCT scans.",
+        "image": "images/fiu.jpg"
+      }
+    ]
   },
   "med": {
     "header": {

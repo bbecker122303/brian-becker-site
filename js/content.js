@@ -50,13 +50,30 @@
         }).join('');
     }
 
+    function normalizeAbout(about) {
+        if (!about.experiences?.length && about.volunteer) {
+            about.experiences = [{
+                id: 'exp-1',
+                title: about.volunteer.title,
+                org: about.volunteer.org,
+                description: about.volunteer.description,
+                image: about.volunteer.image || ''
+            }];
+        }
+        if (!about.experiences) about.experiences = [];
+        if (!about.experiencesSectionTitle) about.experiencesSectionTitle = 'Experience';
+        return about;
+    }
+
     function renderAbout(data) {
-        const { header, banner, education, certifications, volunteer } = data.about;
+        const about = normalizeAbout(data.about);
+        const { header, banner, education, certifications, experiences, experiencesSectionTitle } = about;
 
         document.title = `About | ${data.home.hero.title}`;
         setHtml('[data-content="about.header.title"]', escapeHtml(header.title));
         setHtml('[data-content="about.header.subtitle"]', escapeHtml(header.subtitle));
         setHtml('[data-content="about.banner"]', escapeHtml(banner));
+        setHtml('[data-content="about.experiencesTitle"]', escapeHtml(experiencesSectionTitle));
 
         setHtml('[data-content="about.education"]', education.map((row) => `
             <tr>
@@ -71,10 +88,25 @@
                 <td>${escapeHtml(row.organization)}</td>
             </tr>`).join(''));
 
-        setHtml('[data-content="volunteer.title"]', escapeHtml(volunteer.title));
-        setHtml('[data-content="volunteer.org"]', escapeHtml(volunteer.org));
-        setHtml('[data-content="volunteer.description"]', escapeHtml(volunteer.description));
-        setAttr('[data-content="volunteer.image"]', 'src', volunteer.image);
+        const list = document.getElementById('experiences-list');
+        if (!list) return;
+
+        list.innerHTML = experiences.map((exp) => {
+            const imageBlock = exp.image
+                ? `<img src="${escapeHtml(exp.image)}" alt="${escapeHtml(exp.title)}" style="width: 150px; height: auto; border-radius: 4px; margin-left: 20px;">`
+                : '';
+            return `
+                <div class="card" style="border: none; padding-left: 0; margin-bottom: 2rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h3>${escapeHtml(exp.title)}</h3>
+                            <p style="font-weight: 500; color: var(--text-primary); margin-bottom: 15px;">${escapeHtml(exp.org)}</p>
+                            <p>${escapeHtml(exp.description)}</p>
+                        </div>
+                        ${imageBlock}
+                    </div>
+                </div>`;
+        }).join('');
     }
 
     function renderMed(data) {
