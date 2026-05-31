@@ -13,7 +13,12 @@
     }
 
     function bufferToBase64(buffer) {
-        return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 8192) {
+            binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+        }
+        return btoa(binary);
     }
 
     function base64ToBuffer(base64) {
@@ -99,6 +104,21 @@
         sessionToken = null;
         sessionStorage.removeItem(UNLOCK_KEY);
         sessionStorage.removeItem(SESSION_KEY);
+    }
+
+    async function githubFetch(url, options = {}) {
+        const headers = {
+            Accept: 'application/vnd.github.v3+json',
+            ...options.headers
+        };
+        // Custom headers break GitHub CORS preflight — never send Cache-Control etc.
+        delete headers['Cache-Control'];
+
+        try {
+            return await fetch(url, { ...options, headers, cache: 'no-store' });
+        } catch {
+            throw new Error('Network error reaching GitHub. Disable ad blockers, try Chrome, or check your connection.');
+        }
     }
 
     async function sha256(message) {
@@ -642,8 +662,8 @@
 
             try {
                 const { repo } = window.ADMIN_CONFIG;
-                const response = await fetch(`https://api.github.com/repos/${repo}`, {
-                    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
+                const response = await githubFetch(`https://api.github.com/repos/${repo}`, {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
 
                 if (!response.ok) {
@@ -757,13 +777,8 @@
         const { repo, branch } = window.ADMIN_CONFIG;
         const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}&t=${Date.now()}`;
 
-        const response = await fetch(url, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                Accept: 'application/vnd.github.v3+json',
-                'Cache-Control': 'no-cache'
-            },
-            cache: 'no-store'
+        const response = await githubFetch(url, {
+            headers: { Authorization: `Bearer ${token}` }
         });
 
         if (response.status === 404) return null;
@@ -782,11 +797,10 @@
             const body = { message, content, branch };
             if (sha) body.sha = sha;
 
-            const response = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+            const response = await githubFetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`,
-                    Accept: 'application/vnd.github.v3+json',
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(body)
