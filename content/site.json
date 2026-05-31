@@ -48,13 +48,30 @@
     },
     "banner": "I am currently a senior at Florida International University. I am studying Biological Sciences and pre med.",
     "education": [
-      { "institution": "Florida International University", "location": "Miami, FL", "years": "2022 - 2026" },
-      { "institution": "Cooper City High School", "location": "Cooper City, FL", "years": "2020 - 2022" }
+      {
+        "institution": "Florida International University",
+        "location": "Miami, FL",
+        "years": "2022 - 2026"
+      },
+      {
+        "institution": "Cooper City High School",
+        "location": "Cooper City, FL",
+        "years": "2020 - 2022"
+      }
     ],
     "certifications": [
-      { "name": "Basic Life Support (BLS)", "organization": "AHA" },
-      { "name": "Adobe Premiere Pro CC", "organization": "Adobe" },
-      { "name": "Adobe Photoshop CC", "organization": "Adobe" }
+      {
+        "name": "Basic Life Support (BLS)",
+        "organization": "AHA"
+      },
+      {
+        "name": "Adobe Premiere Pro CC",
+        "organization": "Adobe"
+      },
+      {
+        "name": "Adobe Photoshop CC",
+        "organization": "Adobe"
+      }
     ],
     "volunteer": {
       "title": "Physician Shadow",
@@ -81,7 +98,7 @@
         "journal": "MicroPubl Biol, January 26, 2025",
         "description": "Bacteriophages Biscayne, Bush and GreenIvy were isolated from soil samples in Miami, FL using Microbacterium foliorum NRRL B-24224 as host. Transmission electron microscopy shows siphoviral morphologies for all three phages. Based on gene content similarity to other actinobacteriophages, they are assigned to the EE, GA and EA5 clusters, respectively.",
         "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11749239/",
-        "firstAuthor": false
+        "firstAuthor": true
       },
       {
         "id": "pub-2",
