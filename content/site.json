@@ -1,0 +1,163 @@
+{
+  "home": {
+    "hero": {
+      "title": "Brian Becker",
+      "subtitle": "Owneer / Founder of Elite Marketing & Pre Medical Student at Florida International University.",
+      "bio": "Focused on innovation in Out-of-Home advertising and focusing on studying Oncology research.",
+      "ctaText": "Get in Touch",
+      "ctaLink": "contact.html",
+      "profileImage": "images/headshot.jpeg"
+    },
+    "sections": [
+      {
+        "title": "Vue - Digital Billboards",
+        "subtitle": "The World's First iOS Native Billboard Booking App.",
+        "body": "Vue Billboards is a new OOH DSP partnered with Perion (NASDAQ: PERI) delivering digital billboard access to anyone with the worlds first iOS native OOH app. We also work with agencies of all sizes to deliver billboard campaigns at a low tech fee.",
+        "image": "images/Vue.jpeg",
+        "linkText": "See the App",
+        "linkHref": "business.html",
+        "imageFirst": false,
+        "grayBg": false
+      },
+      {
+        "title": "Elite Marketing Outdoor",
+        "subtitle": "Billboard Agency.",
+        "body": "Elite Marketing Outdoor, LLC, which owns Vue Billboards, specializes in planning and executing large scale billboard campaigns. From small companies to large national brands, Elite Marketing uses our own proprietary DSP to deliver billboard campaigns at an exceptionally low tech fee.",
+        "image": "images/TSQ.jpeg",
+        "linkText": "Learn More",
+        "linkHref": "business.html#elite",
+        "imageFirst": true,
+        "grayBg": true
+      },
+      {
+        "title": "Medical Research & Publications",
+        "subtitle": "Pre Medical - Planning to specialize in Surgical Oncology.",
+        "body": "As a childhood cancer survivor, I am passionate about contributing to Oncology research. I plan to specialize in Surgical Oncology and have contributed to some ocular oncology research.",
+        "image": "images/med.jpg",
+        "linkText": "Read Publications",
+        "linkHref": "med.html",
+        "imageFirst": false,
+        "grayBg": false
+      }
+    ]
+  },
+  "about": {
+    "header": {
+      "title": "About Me",
+      "subtitle": "My current academic journey."
+    },
+    "banner": "I am currently a senior at Florida International University. I am studying Biological Sciences and pre med.",
+    "education": [
+      {
+        "institution": "Florida International University",
+        "location": "Miami, FL",
+        "years": "2022 - 2026"
+      },
+      {
+        "institution": "Cooper City High School",
+        "location": "Cooper City, FL",
+        "years": "2020 - 2022"
+      }
+    ],
+    "certifications": [
+      {
+        "name": "Basic Life Support (BLS)",
+        "organization": "AHA"
+      },
+      {
+        "name": "Adobe Premiere Pro CC",
+        "organization": "Adobe"
+      },
+      {
+        "name": "Adobe Photoshop CC",
+        "organization": "Adobe"
+      }
+    ],
+    "volunteer": {
+      "title": "Physician Shadow",
+      "org": "Murray Ocular Oncology and Retina (Aug 2021 - Present)",
+      "description": "I have shadowed Dr. Murray for over 4 years, gaining invaluable research experience. During this time, I learned to use advanced technological equipment such as the Optos for eye imaging and how to interpret OCT scans.",
+      "image": "images/fiu.jpg"
+    }
+  },
+  "med": {
+    "header": {
+      "title": "Medical Research",
+      "subtitle": "Pre Medical - Planning to specialize in Surgical Oncology."
+    },
+    "about": {
+      "paragraphs": [
+        "As a childhood cancer survivor, I am passionate about contributing to Oncology research. I plan to specialize in Surgical Oncology and have contributed to some ocular oncology research.",
+        "My academic journey is driven by a desire to improve patient outcomes through rigorous scientific inquiry and compassion."
+      ]
+    },
+    "publications": [
+      {
+        "id": "pub-1",
+        "title": "Genome Sequence of Three Siphoviruses in the EE, GA and EA5 Actinobacteriophage Clusters: Biscayne, Bush and GreenIvy",
+        "journal": "MicroPubl Biol, January 26, 2025",
+        "description": "Bacteriophages Biscayne, Bush and GreenIvy were isolated from soil samples in Miami, FL using Microbacterium foliorum NRRL B-24224 as host. Transmission electron microscopy shows siphoviral morphologies for all three phages. Based on gene content similarity to other actinobacteriophages, they are assigned to the EE, GA and EA5 clusters, respectively.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11749239/",
+        "firstAuthor": true
+      },
+      {
+        "id": "pub-2",
+        "title": "Circumscribed Choroidal Hemangioma Simulating Choroidal Melanoma on Advanced Ultrawide-field Pseudocolor Retinal Imaging: A Case Series",
+        "journal": "Ophthalmic Surgery, Lasers and Imaging Retina, April 23, 2023",
+        "description": "The purpose of this case series was to evaluate the features of circumscribed choroidal hemangioma on pseudocolor ultrawide-field (UWF) retinal images simulating choroidal melanoma and compare it to fundoscopic appearance. All four patients underwent full ophthalmological examination, including dilated fundus examination, ultrasonography, and UWF imaging (UWFI). All circumscribed choroidal hemangioma appeared clinically as orange-red choroidal lesions which were echodense with regular internal structure on ultrasonography. All lesions appeared green-grey in color on pseudocolor UWFI. Pseudocolor UWFI of circumscribed choroidal hemangioma represents distortion of true color appearance and may simulate choroidal melanoma.",
+        "url": "https://journals.healio.com/doi/10.3928/23258160-20230403-01",
+        "firstAuthor": true
+      },
+      {
+        "id": "pub-3",
+        "title": "Erdafitinib-Induced Secondary Maculopathy",
+        "journal": "Journal of VitreoRetinal Diseases, June 3, 2022",
+        "description": "This work presents a case of secondary maculopathy associated with the use of erdafitinib (Balversa) for the management of bladder urothelial carcinoma with bony metastasis.",
+        "url": "https://journals.sagepub.com/doi/10.1177/24741264221092908",
+        "firstAuthor": true
+      }
+    ]
+  },
+  "business": {
+    "header": {
+      "title": "Business Ventures",
+      "subtitle": "Innovation in Out-of-Home Advertising."
+    },
+    "vue": {
+      "title": "Vue - Digital Billboards",
+      "subtitle": "The World's First iOS Native Billboard Booking App.",
+      "ownerNote": "Owned by Elite Marketing Outdoor",
+      "bullets": [
+        "I solely founded Vue Billboards, pioneering a programmatic billboard booking platform accessible via iOS and web applications.",
+        "Solo-developed a groundbreaking iOS and web app utilizing Swift, HTML, JavaScript, CSS, and React, integrating Firebase and AWS for enhanced performance.",
+        "Managed campaign placements and provided exceptional customer support, ensuring user satisfaction and operational efficiency."
+      ],
+      "websiteUrl": "https://vuebillboards.com",
+      "videoSrc": "images/wrapped.mp4"
+    },
+    "elite": {
+      "title": "Elite Marketing Outdoor",
+      "subtitle": "Billboard Agency.",
+      "body": "My marketing agency specializes in digital outdoor advertising options such as billboards, Gym TVs, Mall Kiosks, and billboard boats. At Elite Marketing, we specialize exclusively in innovative out-of-home (OOH) advertising solutions powered by advanced programmatic buying strategies to maximize reach and results.",
+      "bullets": [
+        "We also own Vue Billboards, our technology company, which provides cutting-edge OOH tech and data capabilities—giving our clients unmatched targeting precision and campaign performance.",
+        "I am the sole founder and have an active, hands-on role in the business, personally leading initial discovery consultations, overseeing campaign strategy, and managing client accounts to ensure every project delivers measurable impact."
+      ],
+      "image": "images/TSQ.jpeg",
+      "websiteUrl": "https://elitemarketing.agency"
+    }
+  },
+  "contact": {
+    "header": {
+      "title": "Contact Me",
+      "subtitle": "Let's start a conversation."
+    },
+    "intro": "Get in touch.",
+    "email": "bbecker@fiu.edu",
+    "phone": "(954) 551-4923"
+  },
+  "footer": {
+    "year": 2025,
+    "email": "bbecker@fiu.edu"
+  }
+}
